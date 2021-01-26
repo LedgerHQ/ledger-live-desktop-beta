@@ -14,9 +14,6 @@ import { isNavigationLocked } from "~/renderer/reducers/application";
 import { openModal } from "~/renderer/actions/modals";
 import { setFirstTimeLend, setSidebarCollapsed } from "~/renderer/actions/settings";
 
-import useExperimental from "~/renderer/hooks/useExperimental";
-import { setTrackingSource } from "~/renderer/analytics/TrackPage";
-
 import { darken, rgba } from "~/renderer/styles/helpers";
 
 import IconManager from "~/renderer/icons/Manager";
@@ -36,7 +33,6 @@ import Space from "~/renderer/components/Space";
 import UpdateDot from "~/renderer/components/Updater/UpdateDot";
 import { Dot } from "~/renderer/components/Dot";
 import Stars from "~/renderer/components/Stars";
-import useEnv from "~/renderer/hooks/useEnv";
 
 import TopGradient from "./TopGradient";
 import Hide from "./Hide";
@@ -161,21 +157,21 @@ const SideBar = styled(Box).attrs(() => ({
 `;
 
 const TagContainer = ({ collapsed }: { collapsed: boolean }) => {
-  const isExperimental = useExperimental();
-  const hasFullNodeConfigured = useEnv("SATSTACK"); // NB remove once full node is not experimental
-
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const currentVersion = __APP_VERSION__;
 
-  return isExperimental || hasFullNodeConfigured ? (
-    <Tag
-      id="drawer-experimental-button"
-      to={{ pathname: "/settings/experimental" }}
-      onClick={() => setTrackingSource("sidebar")}
-    >
+  const openReleaseNotesModal = useCallback(
+    () => dispatch(openModal("MODAL_RELEASE_NOTES", currentVersion)),
+    [currentVersion, dispatch],
+  );
+
+  return (
+    <Tag id="drawer-experimental-button" onClick={openReleaseNotesModal}>
       <IconExperimental width={16} height={16} />
-      <TagText collapsed={collapsed}>{t("common.experimentalFeature")}</TagText>
+      <TagText collapsed={collapsed}>{t("common.beta")}</TagText>
     </Tag>
-  ) : null;
+  );
 };
 
 const MainSideBar = () => {
